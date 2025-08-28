@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneABot для Everon</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="main-content">
+        <header>
+            <img src="icon.jpg" alt="Иконка">
+            <h1>Бонус от Everon</h1>
+        </header>
+
+        <div id="controls">
+            <div id="status" style="display: none;"></div>
+            <button onclick="openSettings()">Настройки</button>
+            <button onclick="reset()">Сбросить</button>
+            <button onclick="clearChat()">Очистить чат</button>
+            <br><br>
+            <button onclick="startRoulette()" disabled id="roulette-btn">Запустить</button>
+        </div>
+
+        <div id="chat-container">
+            <div id="chat"></div>
+            <div id="participants">
+                <h2>Участников: <span id="participant-count">0</span></h2>
+                <div id="participant-list"></div>
+            </div>
+        </div>
+
+        <div id="winner"></div>
+        <div id="winner-messages"></div>
+    </div>
+
+    <!-- Модальное окно настроек -->
+    <div id
+
+="settings-modal" class="modal">
+        <div class="modal-content">
+            <h2>Настройки</h2>
+            <label for="settings-channel">Название канала:</label>
+            <input type="text" id="settings-channel" value="everonn">
+            <label for="settings-codeword">Кодовое слово:</label>
+            <input type="text" id="settings-codeword" placeholder="Введите кодовое слово">
+            <label for="settings-response-time">Время ответа (секунды):</label>
+            <input type="number" id="settings-response-time" value="30" min="1">
+            <button onclick="saveSettings()">Сохранить</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно рулетки -->
+    <div id="roulette-modal" class="modal">
+        <div class="modal-content">
+            <h2>Рулетка</h2>
+            <div id="roulette">
+                <ul id="roulette-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно победителя -->
+    <div id="winner-response-modal" class="modal">
+        <div class="modal-content">
+            <h2>Победитель: <span id="winner-name"></span></h2>
+            <div id="winner-response-timer"></div>
+            <div id="winner-response-message"></div>
+            <button id="winner-back-btn" style="display: none;" onclick="closeWinnerModal()">Назад</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

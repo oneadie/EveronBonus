@@ -1,0 +1,364 @@
+body {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #2b1b4d, #1a1a2e);
+    color: #e0d4ff;
+    margin: 0;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+#main-content.blur {
+    filter: blur(5px);
+}
+
+header {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(90deg, #5e3cbb, #7b4ed9);
+    padding: 20px 40px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 1600px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+header img {
+    width: 80px;
+    height: 80px;
+    margin-right: 20px;
+    border-radius: 50%;
+    border: 2px solid #e0d4ff;
+}
+
+header h1 {
+    font-size: 2.2rem;
+    margin: 0;
+    color: #f0e7ff;
+    flex-grow: 1;
+}
+
+#controls {
+    margin: 30px 0;
+    width: 100%;
+    max-width: 1600px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+#controls input, #controls button {
+    padding: 12px 25px;
+    margin: 8px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 500;
+    min-width: 180px;
+}
+
+#controls button {
+    background: linear-gradient(90deg, #6f42c1, #8a5ed6);
+    color: #f0e7ff;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+}
+
+#controls button:hover {
+    background: linear-gradient(90deg, #5e35b1, #7b4ed9);
+    transform: translateY(-2px);
+}
+
+#controls button:disabled {
+    background: #4b3a7a;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+#controls #roulette-btn {
+    background: linear-gradient(90deg, #28a745, #34d058);
+    color: #ffffff;
+}
+
+#controls #roulette-btn:hover {
+    background: linear-gradient(90deg, #218838, #2dc653);
+    transform: translateY(-2px);
+}
+
+#controls #roulette-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+#status {
+    margin: 15px 0;
+    font-size: 1.1rem;
+    color: #ff9999;
+    width: 100%;
+    text-align: center;
+}
+
+#chat-container {
+    display: flex;
+    width: 100%;
+    max-width: 1600px;
+    gap: 40px;
+}
+
+#chat {
+    border: 1px solid #5e3cbb;
+    height: 500px;
+    overflow-y: scroll;
+    padding: 20px;
+    background-color: #2a213f;
+    width: 70%;
+    max-width: 1120px;
+    min-width: 1120px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+#chat p {
+    margin: 8px 0;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    font-size: 1rem;
+    max-width: 100%;
+}
+
+#chat p img.emote {
+    vertical-align: middle;
+    height: 28px;
+    width: 28px;
+}
+
+#participants {
+    width: 30%;
+    min-width: 480px;
+    display: flex;
+    flex-direction: column;
+    height: 500px;
+    box-sizing: border-box;
+}
+
+#participants h2 {
+    margin: 0 0 10px 0;
+    padding: 0;
+    font-size: 1.5rem;
+    color: #f0e7ff;
+}
+
+#participant-list {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #2a213f;
+    border: 1px solid #5e3cbb;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    min-height: 0;
+}
+
+#participant-list .participant {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    margin: 4px 0;
+    background-color: #3b2e5c;
+    border-radius: 8px;
+    font-size: 1rem;
+    line-height: 1.4;
+    min-height: 28px;
+}
+
+#participant-list .participant .remove-btn {
+    cursor: pointer;
+    color: #ff9999;
+    font-size: 1rem;
+    padding: 0 8px;
+    transition: color 0.2s;
+}
+
+#participant-list .participant .remove-btn:hover {
+    color: #ff6666;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #3b2e5c, #2a213f);
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 1000px;
+    animation: slideIn 0.3s ease-out;
+    z-index: 1001;
+    position: relative;
+    margin: auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-content label {
+    display: block;
+    margin-top: 15px;
+    font-size: 1.1rem;
+    color: #e0d4ff;
+}
+
+.modal-content input, .modal-content button {
+    padding: 12px;
+    margin: 8px 0;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    background-color: #3b2e5c;
+    color: #f0e7ff;
+}
+
+.modal-content input:focus {
+    outline: none;
+    border: 2px solid #7b4ed9;
+}
+
+.modal-content button {
+    background: linear-gradient(90deg, #6f42c1, #8a5ed6);
+    color: #f0e7ff;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.modal-content button:hover {
+    background: linear-gradient(90deg, #5e35b1, #7b4ed9);
+}
+
+#roulette-modal .modal-content {
+    width: 90%;
+    max-width: 1600px;
+    text-align: center;
+}
+
+#roulette {
+    height: 80px;
+    overflow: hidden;
+    border: 1px solid #5e3cbb;
+    background-color: #2a213f;
+    position: relative;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#roulette ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    transition: top 6s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+#roulette li {
+    height: 80px;
+    line-height: 80px;
+    text-align: center;
+    font-size: 1.5rem;
+    color: #f0e7ff;
+}
+
+#winner {
+    margin: 30px 0;
+    font-size: 2rem;
+    font-weight: 600;
+    width: 100%;
+    max-width: 1600px;
+    text-align: center;
+    color: #e0d4ff;
+}
+
+#winner-messages {
+    border: 1px solid #5e3cbb;
+    padding: 20px;
+    background-color: #2a213f;
+    width: 100%;
+    max-width: 1600px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#winner-response-modal .modal-content {
+    text-align: center;
+}
+
+#winner-response-timer {
+    font-size: 1.5rem;
+    margin: 15px 0;
+    color: #e0d4ff;
+}
+
+#winner-response-message p {
+    margin: 8px 0;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    header img {
+        width: 60px;
+        height: 60px;
+    }
+    header h1 {
+        font-size: 1.8rem;
+    }
+    #controls input, #controls button {
+        width: 100%;
+        margin: 8px 0;
+        min-width: 0;
+    }
+    #chat-container {
+        flex-direction: column;
+    }
+    #chat, #participants {
+        width: 100%;
+        min-width: 0;
+    }
+    #participants {
+        height: auto;
+        margin-top: 30px;
+    }
+    #participant-list {
+        max-height: 400px;
+    }
+    #roulette li {
+        font-size: 1.2rem;
+    }
+}
