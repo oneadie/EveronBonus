@@ -3,287 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Chat Monitor</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        input { width: 100%; padding: 10px; margin-bottom: 10px; }
-        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
-        button:hover { background: #0056b3; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background: #f2f2f2; }
-        #status { margin-top: 10px; color: red; }
-        #log { margin-top: 20px; padding: 10px; background: #f8f9fa; border: 1px solid #ddd; max-height: 200px; overflow-y: auto; font-family: monospace; white-space: pre-wrap; }
-    </style>
+    <title>OneABot для Everon</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Мониторинг чата YouTube-стрима</h1>
-    <p>Войди через Google, введи ссылку на live-стрим и нажми "Старт". В таблице появятся уникальные пользователи, написавшие в чат.</p>
-    
-    <button id="authBtn">Войти через Google</button>
-    <div id="authStatus"></div>
-    
-    <label for="streamUrl">Ссылка на стрим (например, https://www.youtube.com/watch?v=...):</label>
-    <input type="text" id="streamUrl" placeholder="Вставь ссылку на стрим" value="https://www.youtube.com/watch?v=yZXus_cFs9M" required>
-    
-    <button id="startBtn" style="display: none;">Старт мониторинга</button>
-    <button id="stopBtn" style="display: none; background: #dc3545;">Стоп</button>
-    
-    <div id="status"></div>
-    
-    <table id="userTable" style="display: none;">
-        <thead>
-            <tr>
-                <th>№</th>
-                <th>Ник пользователя</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div id="main-content">
+        <header>
+            <img src="icon.jpg" alt="Иконка">
+            <h1>Бонус от Everon</h1>
+        </header>
 
-    <h2>Логи</h2>
-    <div id="log"></div>
+        <div id="controls">
+            <div id="status" style="display: none;"></div>
+            <button onclick="openSettings()">Настройки</button>
+            <button onclick="reset()">Сбросить</button>
+            <button onclick="clearChat()">Очистить чат</button>
+            <br><br>
+            <button onclick="startRoulette()" disabled id="roulette-btn">Запустить</button>
+        </div>
 
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script>
-        const CLIENT_ID = '299438476349-47dudu11cu05q3g61q23pdruc2ocs021.apps.googleusercontent.com';
-        const API_SCOPE = 'https://www.googleapis.com/auth/youtube.readonly';
-        const API_KEY = 'AIzaSyAYxTFaFTrdoZ3q8x_s815pH-OC-1DA2IE';
-        
-        const streamUrlInput = document.getElementById('streamUrl');
-        const authBtn = document.getElementById('authBtn');
-        const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const authStatus = document.getElementById('authStatus');
-        const statusDiv = document.getElementById('status');
-        const table = document.getElementById('userTable');
-        const tbody = table.querySelector('tbody');
-        const logDiv = document.getElementById('log');
+        <div id="chat-container">
+            <div id="chat"></div>
+            <div id="participants">
+                <h2>Участников: <span id="participant-count">0</span></h2>
+                <div id="participant-list"></div>
+            </div>
+        </div>
 
-        let pollingInterval;
-        let nextPageToken = '';
-        let liveChatId = '';
-        let users = new Set();
-        let accessToken = '';
-        let gapiLoaded = false;
+        <div id="winner"></div>
+        <div id="winner-messages"></div>
+    </div>
 
-        function logMessage(message) {
-            const timestamp = new Date().toISOString();
-            const logEntry = `[${timestamp}] ${message}\n`;
-            logDiv.textContent += logEntry;
-            console.log(logEntry.trim());
-            logDiv.scrollTop = logDiv.scrollHeight;
-        }
+    <!-- Модальное окно настроек -->
+    <div id
 
-        function initGapi() {
-            if (gapiLoaded) return;
-            gapi.load('client:auth2', () => {
-                gapi.client.init({
-                    apiKey: API_KEY,
-                    clientId: CLIENT_ID,
-                    scope: API_SCOPE,
-                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest']
-                }).then(() => {
-                    gapiLoaded = true;
-                    gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-                    updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-                    logMessage('gapi инициализирована успешно.');
-                }).catch(error => {
-                    logMessage(`Ошибка инициализации gapi: ${error.error || error.message}. Проверь Client ID и origin[](https://oneadie.github.io).`);
-                    authStatus.textContent = 'Ошибка: Проверь настройки OAuth (Authorized JavaScript origins должен быть https://oneadie.github.io).';
-                });
-            });
-        }
+="settings-modal" class="modal">
+        <div class="modal-content">
+            <h2>Настройки</h2>
+            <label for="settings-channel">Название канала:</label>
+            <input type="text" id="settings-channel" value="everonn">
+            <label for="settings-codeword">Кодовое слово:</label>
+            <input type="text" id="settings-codeword" placeholder="Введите кодовое слово">
+            <label for="settings-response-time">Время ответа (секунды):</label>
+            <input type="number" id="settings-response-time" value="30" min="1">
+            <button onclick="saveSettings()">Сохранить</button>
+        </div>
+    </div>
 
-        function updateSigninStatus(isSignedIn) {
-            if (isSignedIn) {
-                accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
-                authStatus.textContent = 'Авторизация успешна! Токен получен.';
-                authBtn.style.display = 'none';
-                startBtn.style.display = 'inline-block';
-                logMessage('OAuth авторизация успешна. Доступен Bearer-токен.');
-            } else {
-                authStatus.textContent = 'Нажми "Войти через Google" для доступа к чату.';
-                authBtn.style.display = 'inline-block';
-                startBtn.style.display = 'none';
-                logMessage('OAuth не авторизован.');
-            }
-        }
+    <!-- Модальное окно рулетки -->
+    <div id="roulette-modal" class="modal">
+        <div class="modal-content">
+            <h2>Рулетка</h2>
+            <div id="roulette">
+                <ul id="roulette-list"></ul>
+            </div>
+        </div>
+    </div>
 
-        authBtn.addEventListener('click', () => {
-            if (!gapiLoaded) initGapi();
-            gapi.auth2.getAuthInstance().signIn();
-            logMessage('Инициирована OAuth авторизация.');
-        });
+    <!-- Модальное окно победителя -->
+    <div id="winner-response-modal" class="modal">
+        <div class="modal-content">
+            <h2>Победитель: <span id="winner-name"></span></h2>
+            <div id="winner-response-timer"></div>
+            <div id="winner-response-message"></div>
+            <button id="winner-back-btn" style="display: none;" onclick="closeWinnerModal()">Назад</button>
+        </div>
+    </div>
 
-        startBtn.addEventListener('click', async () => {
-            const url = streamUrlInput.value.trim();
-            logMessage(`Начало мониторинга. Ссылка: ${url}`);
-            
-            if (!url) {
-                statusDiv.textContent = 'Введи ссылку!';
-                logMessage('Ошибка: Отсутствует ссылка.');
-                return;
-            }
-            
-            const videoId = extractVideoId(url);
-            if (!videoId) {
-                statusDiv.textContent = 'Неверная ссылка!';
-                logMessage(`Ошибка: Неверный videoId: ${videoId}`);
-                return;
-            }
-            
-            logMessage(`VideoId: ${videoId}`);
-            
-            try {
-                // Проверка live-статуса с API-ключом
-                const isLive = await checkIfLive(videoId, true);
-                logMessage(`Live? ${isLive}`);
-                if (!isLive) {
-                    statusDiv.textContent = 'Это не live-стрим или он завершён!';
-                    logMessage('Ошибка: Видео не является активным live-стримом.');
-                    return;
-                }
-                
-                // Попытка получить liveChatId
-                let chatIdFromVideos = await getLiveChatIdFromVideos(videoId, true);
-                if (chatIdFromVideos) {
-                    liveChatId = chatIdFromVideos;
-                    logMessage(`Fallback liveChatId из videos: ${liveChatId}`);
-                } else if (accessToken) {
-                    liveChatId = await getLiveChatId(videoId, false);
-                    logMessage(`OAuth liveChatId из liveBroadcasts: ${liveChatId}`);
-                } else {
-                    statusDiv.textContent = 'Авторизуйся через Google для доступа к чату.';
-                    logMessage('Ошибка: Требуется OAuth для liveChatId.');
-                    return;
-                }
-                
-                if (!liveChatId) {
-                    statusDiv.textContent = 'Чат не найден (возможно, отключён).';
-                    logMessage('Ошибка: liveChatId не найден.');
-                    return;
-                }
-                
-                startBtn.style.display = 'none';
-                stopBtn.style.display = 'inline-block';
-                table.style.display = 'table';
-                
-                logMessage(`Мониторинг чата ${liveChatId} запущен.`);
-                pollChat();
-                pollingInterval = setInterval(() => {
-                    logMessage('Запуск polling...');
-                    pollChat();
-                }, 5000);
-            } catch (error) {
-                statusDiv.textContent = `Ошибка: ${error.message}`;
-                logMessage(`Критическая ошибка: ${error.message}`);
-            }
-        });
-
-        stopBtn.addEventListener('click', () => {
-            clearInterval(pollingInterval);
-            startBtn.style.display = 'inline-block';
-            stopBtn.style.display = 'none';
-            statusDiv.textContent = 'Мониторинг остановлен.';
-            logMessage('Мониторинг остановлен.');
-        });
-
-        function extractVideoId(url) {
-            const regex = /(?:v=|\/)([0-9A-Za-z_-]{11})/;
-            const match = url.match(regex);
-            return match ? match[1] : null;
-        }
-
-        async function checkIfLive(videoId, useApiKey = true) {
-            try {
-                await gapi.client.load('youtube', 'v3');
-                const params = { part: 'liveStreamingDetails', id: videoId };
-                let response;
-                if (useApiKey) {
-                    response = await fetch(`https://www.googleapis.com/youtube/v3/videos?${new URLSearchParams(params)}&key=${API_KEY}`).then(r => r.json());
-                } else {
-                    response = await gapi.client.youtube.videos.list(params);
-                }
-                logMessage(`checkIfLive response: ${JSON.stringify(response, null, 2)}`);
-                return response.items?.[0]?.liveStreamingDetails?.actualStartTime;
-            } catch (error) {
-                logMessage(`Ошибка checkIfLive: ${error.message}`);
-                throw error;
-            }
-        }
-
-        async function getLiveChatIdFromVideos(videoId, useApiKey = true) {
-            try {
-                const params = { part: 'liveStreamingDetails', id: videoId };
-                let response;
-                if (useApiKey) {
-                    response = await fetch(`https://www.googleapis.com/youtube/v3/videos?${new URLSearchParams(params)}&key=${API_KEY}`).then(r => r.json());
-                } else {
-                    await gapi.client.load('youtube', 'v3');
-                    response = await gapi.client.youtube.videos.list(params);
-                }
-                logMessage(`getLiveChatIdFromVideos response: ${JSON.stringify(response, null, 2)}`);
-                return response.items?.[0]?.liveStreamingDetails?.activeLiveChatId || null;
-            } catch (error) {
-                logMessage(`Ошибка getLiveChatIdFromVideos: ${error.message}`);
-                return null;
-            }
-        }
-
-        async function getLiveChatId(videoId, useOAuth = true) {
-            try {
-                await gapi.client.load('youtube', 'v3');
-                const response = await gapi.client.youtube.liveBroadcasts.list({
-                    part: 'liveStreamingDetails',
-                    id: videoId
-                });
-                logMessage(`getLiveChatId response: ${JSON.stringify(response.result, null, 2)}`);
-                return response.result.items?.[0]?.liveStreamingDetails?.activeLiveChatId || null;
-            } catch (error) {
-                logMessage(`Ошибка getLiveChatId: ${error.message}`);
-                throw error;
-            }
-        }
-
-        async function pollChat() {
-            try {
-                await gapi.client.load('youtube', 'v3');
-                const params = { liveChatId, part: 'snippet,authorDetails', pageToken: nextPageToken };
-                let response;
-                if (accessToken) {
-                    response = await gapi.client.youtube.liveChatMessages.list(params);
-                } else {
-                    const url = `https://www.googleapis.com/youtube/v3/liveChat/messages?${new URLSearchParams(params)}&key=${API_KEY}`;
-                    response = await fetch(url).then(r => r.json());
-                }
-                logMessage(`pollChat response: Получено ${response.items?.length || 0} сообщений`);
-                
-                response.items?.forEach(item => {
-                    const author = item.authorDetails.displayName;
-                    logMessage(`Сообщение от ${author}: ${item.snippet.displayMessage}`);
-                    if (!users.has(author)) {
-                        users.add(author);
-                        addToTable(author);
-                        logMessage(`Новый пользователь: ${author} (всего: ${users.size})`);
-                    }
-                });
-                
-                nextPageToken = response.nextPageToken || '';
-                logMessage(`Следующий pageToken: ${nextPageToken}`);
-            } catch (error) {
-                logMessage(`Ошибка pollChat: ${error.message}`);
-                statusDiv.textContent = `Ошибка при получении сообщений: ${error.message}`;
-            }
-        }
-
-        function addToTable(author) {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td>${users.size}</td><td>${author}</td>`;
-            tbody.appendChild(row);
-        }
-
-        initGapi();
-    </script>
+    <script src="script.js"></script>
 </body>
+
 </html>
